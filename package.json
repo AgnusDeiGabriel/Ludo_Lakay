@@ -1,0 +1,15 @@
+{
+  "name": "ludo-lakay",
+  "version": "1.0.0",
+  "description": "Ludo an liy ak mize — tab prive ak piblik, stil ayisyen",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "demo": "DEMO_MODE=1 node server/server.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
