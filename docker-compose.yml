@@ -1,6 +1,7 @@
 # Ludo Lakay + tinèl Cloudflare
-#   cp .env.example .env   (mete CLOUDFLARE_TUNNEL_TOKEN ladan l)
-#   docker compose up -d --build
+#   docker compose up -d --build      -> sèvè a sèlman (http://IP:3000)
+#   ./tunnel.sh                       -> tinèl rapid (san kont), ba w yon lyen https://….trycloudflare.com
+#   ./tunnel.sh setup ludo.domen.com  -> tinèl pèmanan sou domèn ou
 services:
   app:
     build: .
@@ -18,13 +19,26 @@ services:
     ports:
       - "${LAN_PORT:-3000}:3000"
 
+  # Tinèl pèmanan (bezwen CLOUDFLARE_TUNNEL_TOKEN nan .env)
   cloudflared:
     image: cloudflare/cloudflared:2024.12.2
     container_name: ludo-lakay-tunnel
+    profiles: ["named"]
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
+    command: tunnel --no-autoupdate run --url http://app:3000
     environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Mete CLOUDFLARE_TUNNEL_TOKEN nan .env}
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # Tinèl rapid trycloudflare.com (san kont, lyen an chanje chak fwa l rekòmanse)
+  quicktunnel:
+    image: cloudflare/cloudflared:2024.12.2
+    container_name: ludo-lakay-quicktunnel
+    profiles: ["quick"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://app:3000
     depends_on:
       app:
         condition: service_healthy

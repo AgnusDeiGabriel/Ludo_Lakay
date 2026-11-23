@@ -1,6 +1,9 @@
 node_modules
 data
 .env
+.env.tmp
+.cloudflared
+tunnel.sh
 .git
 .gitignore
 Dockerfile

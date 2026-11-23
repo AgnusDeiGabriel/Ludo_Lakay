@@ -24,22 +24,29 @@ apt update && apt install -y curl git
 curl -fsSL https://get.docker.com | sh
 ```
 
-### 2. Kreye tinèl la sou Cloudflare
-1. [one.dash.cloudflare.com](https://one.dash.cloudflare.com) → **Networks → Tunnels → Create a tunnel** → **Cloudflared**.
-2. Ba l yon non (egz: `ludo-lakay`), chwazi **Docker**, epi kopye **token** ki nan kòmand lan (long tèks ki apre `--token`).
-3. Nan **Public Hostname**: sous-domèn `ludo`, domèn ou, **Service**: `HTTP` → `app:3000`.
-   (`app` se non sèvis la nan `docker-compose.yml`; cloudflared jwenn li sou rezo Docker la.)
+### 2. Lanse l + tinèl la (yon sèl kòmand)
+```bash
+git clone https://github.com/AgnusDeiGabriel/Ludo_Lakay.git && cd Ludo_Lakay
+chmod +x tunnel.sh
+```
+**Tinèl rapid** (pa bezwen kont Cloudflare): ba w yon lyen `https://….trycloudflare.com` touswit.
+```bash
+./tunnel.sh
+```
+**Tinèl pèmanan** sou domèn ou (domèn nan dwe deja sou Cloudflare):
+```bash
+./tunnel.sh setup ludo.domen-ou.com
+```
+Li ba w yon lyen pou w ouvri nan navigatè a pou w otorize kont lan (yon sèl fwa). Answit li kreye tinèl la, DNS la, token an (sere nan `.env`), epi li lanse tout bagay.
+
+Lòt kòmand: `./tunnel.sh status` · `./tunnel.sh stop` · `docker compose up -d --build` (sèvè a sèlman, san tinèl).
+
+Si w pito kreye tinèl la nan dashboard Cloudflare (Zero Trust → Networks → Tunnels → Docker), kole token an nan `.env` (`CLOUDFLARE_TUNNEL_TOKEN=...`), mete Public Hostname → `HTTP` → `app:3000`, epi lanse `./tunnel.sh`.
 
 WebSocket (Socket.io) mache atravè tinèl la san okenn lòt konfigirasyon.
 
-### 3. Lanse l
-```bash
-git clone <repo-ou> ludo-lakay && cd ludo-lakay
-cp .env.example .env
-nano .env        # mete CLOUDFLARE_TUNNEL_TOKEN=..., DEMO_MODE=1 oswa 0
-docker compose up -d --build
-```
-- Sit la: `https://ludo.domèn-ou.com` (atravè Cloudflare) oswa `http://IP-machin-lan:3000` sou rezo lokal la.
+### 3. Jesyon
+- Sit la: lyen tinèl la, oswa `http://IP-machin-lan:3000` sou rezo lokal la.
 - Gade log yo: `docker compose logs -f`
 - Mete l ajou: `git pull && docker compose up -d --build`
 - Done yo (balans, tranzaksyon) rete nan volim `ludo-data`, yo pa pèdi lè w rebati imaj la. Fè backup:
