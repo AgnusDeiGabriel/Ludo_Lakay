@@ -12,6 +12,41 @@ npm start           # pwodiksyon (DEMO_MODE=0)
 ```
 Ouvri `http://localhost:3000`. Pou teste an liy, ouvri plizyè navigatè oswa plizyè telefòn sou menm rezo a.
 
+## Docker sou Proxmox + tinèl Cloudflare
+
+### 1. Prepare yon machin sou Proxmox
+- **Opsyon A — LXC** (pi lejè): kreye yon CT Debian 12, 1 vCPU, 1 GB RAM, 8 GB disk. Nan **Options → Features**, aktive **nesting** ak **keyctl** (Docker bezwen yo).
+- **Opsyon B — VM**: Debian 12 oswa Ubuntu 24.04 nòmal.
+
+Answit enstale Docker ladan l:
+```bash
+apt update && apt install -y curl git
+curl -fsSL https://get.docker.com | sh
+```
+
+### 2. Kreye tinèl la sou Cloudflare
+1. [one.dash.cloudflare.com](https://one.dash.cloudflare.com) → **Networks → Tunnels → Create a tunnel** → **Cloudflared**.
+2. Ba l yon non (egz: `ludo-lakay`), chwazi **Docker**, epi kopye **token** ki nan kòmand lan (long tèks ki apre `--token`).
+3. Nan **Public Hostname**: sous-domèn `ludo`, domèn ou, **Service**: `HTTP` → `app:3000`.
+   (`app` se non sèvis la nan `docker-compose.yml`; cloudflared jwenn li sou rezo Docker la.)
+
+WebSocket (Socket.io) mache atravè tinèl la san okenn lòt konfigirasyon.
+
+### 3. Lanse l
+```bash
+git clone <repo-ou> ludo-lakay && cd ludo-lakay
+cp .env.example .env
+nano .env        # mete CLOUDFLARE_TUNNEL_TOKEN=..., DEMO_MODE=1 oswa 0
+docker compose up -d --build
+```
+- Sit la: `https://ludo.domèn-ou.com` (atravè Cloudflare) oswa `http://IP-machin-lan:3000` sou rezo lokal la.
+- Gade log yo: `docker compose logs -f`
+- Mete l ajou: `git pull && docker compose up -d --build`
+- Done yo (balans, tranzaksyon) rete nan volim `ludo-data`, yo pa pèdi lè w rebati imaj la. Fè backup:
+  `docker run --rm -v ludo-lakay_ludo-data:/d -v $PWD:/b alpine tar czf /b/ludo-data.tgz -C /d .`
+
+Si w pa vle pò 3000 louvri sou rezo lokal la, retire seksyon `ports:` nan `docker-compose.yml`; sit la ap rive sèlman pa tinèl la.
+
 ## Kijan l mache
 
 | Pati | Fichye | Wòl |

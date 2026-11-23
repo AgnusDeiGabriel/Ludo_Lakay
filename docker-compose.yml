@@ -1,0 +1,33 @@
+# Ludo Lakay + tinèl Cloudflare
+#   cp .env.example .env   (mete CLOUDFLARE_TUNNEL_TOKEN ladan l)
+#   docker compose up -d --build
+services:
+  app:
+    build: .
+    image: ludo-lakay:latest
+    container_name: ludo-lakay
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: 3000
+      DB_FILE: /app/data/db.json
+    volumes:
+      - ludo-data:/app/data
+    # Pou rive sou li dirèkteman sou rezo lokal la (http://IP-PROXMOX:3000).
+    # Retire seksyon sa a si w vle li aksesib SÈLMAN pa tinèl la.
+    ports:
+      - "${LAN_PORT:-3000}:3000"
+
+  cloudflared:
+    image: cloudflare/cloudflared:2024.12.2
+    container_name: ludo-lakay-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Mete CLOUDFLARE_TUNNEL_TOKEN nan .env}
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  ludo-data:
